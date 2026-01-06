@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corretor de Gabaritos de Simulados</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'MiSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'MiSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Semibold.ttf') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'MiSans';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        :root {
+            --primary: #00a86b;
+            --primary-dark: #008f5a;
+            --primary-light: #e6f7f0;
+            --secondary: #2c3e50;
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'MiSans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            width: 1920px;
+            margin: 0 auto;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Layout Grid */
+        .container {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+            padding: 40px 60px;
+            gap: 30px;
+        }
+
+        /* Header */
+        header {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 30px 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .logo-container {
+            width: 180px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .header-titles h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header-titles p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-status {
+            display: flex;
+            gap: 20px;
+        }
+
+        .status-badge {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Main Content */
+        main {
+            display: grid;
+            grid-template-columns: 22% 30% 45%; 
+            gap: 30px;
+            justify-content: space-between;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #fff;
+            height: 100%;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header i {
+            font-size: 24px;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .card-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        /* Info Section */
+        .info-content p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .config-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .config-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: var(--bg);
+            border-radius: 16px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .config-item:hover {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 168, 107, 0.1);
+        }
+
+        .config-name {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 16px;
+        }
+
+        .config-questions {
+            font-size: 14px;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* Upload & Correction Section */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            background: var(--bg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 25px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .upload-text h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .upload-text p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 10px;
+            max-height: 250px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--bg);
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .correction-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            font-family: 'MiSans', sans-serif;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Results Section */
+        .results-overview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .overview-card {
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .overview-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .overview-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        th {
+            padding: 18px 20px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px 20px;
+            font-size: 15px;
+            border-bottom: 1px solid var(--bg);
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .score-high {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .score-med {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .score-low {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        /* Chart Placeholder */
+        .chart-container {
+            margin-top: 25px;
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 16px;
+            gap: 15px;
+        }
+
+        .bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .bar {
+            width: 100%;
+            background: var(--primary);
+            border-radius: 6px 6px 0 0;
+            transition: height 1s ease;
+            opacity: 0.8;
+        }
+
+        .bar:hover {
+            opacity: 1;
+        }
+
+        .bar-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--secondary);
+            color: white;
+            padding: 25px 50px;
+            border-radius: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-info h4 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .footer-info p {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .footer-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            opacity: 0.9;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .footer-link:hover {
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                <div class="logo-container">
+                    <img src="https://example.com/escola_logo.png" alt="Logo Escola">
+                </div>
+                <div class="header-titles">
+                    <h1>Corretor de Gabaritos de Simulados</h1>
+                    <p><i class="ri-file-list-3-line"></i> Sistema de correção em massa para até 300 provas</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <div class="status-badge">
+                    <i class="ri-checkbox-circle-line"></i>
+                    Sistema Ativo
+                </div>
+                <div class="status-badge" style="background: #eef2ff; color: #4f46e5;">
+                    <i class="ri-calendar-event-line"></i>
+                    2º Semestre/2023
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Column 1: Config & Info -->
+            <section class="card card-info">
+                <div class="card-header">
+                    <i class="ri-settings-4-line"></i>
+                    <h2>Configurações</h2>
+                </div>
+                <div class="info-content">
+                    <p>Selecione o tipo de prova para iniciar a correção. O sistema identificará automaticamente o padrão de gabarito baseado na configuração.</p>
+                    
+                    <div class="config-list">
+                        <div class="config-item">
+                            <span class="config-name">7° e 8° Ano</span>
+                            <span class="config-questions">40 Questões</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-name">9° Ano</span>
+                            <span class="config-questions">50 Questões</span>
+                        </div>
+                        <div class="config-item" style="border-color: var(--primary); background: #f0fdf4;">
+                            <span class="config-name">1° e 2° Ano</span>
+                            <span class="config-questions">65 Questões</span>
+                            <i class="ri-check-line" style="color: var(--primary); margin-left: auto;"></i>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-name">3° Ano - Dia 1</span>
+                            <span class="config-questions">90 Questões</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-name">3° Ano - Dia 2</span>
+                            <span class="config-questions">90 Questões</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Column 2: Upload & Correct -->
+            <section class="card card-upload">
+                <div class="card-header">
+                    <i class="ri-upload-cloud-2-line"></i>
+                    <h2>Upload e Correção</h2>
+                </div>
+                
+                <div class="upload-area">
+                    <div class="upload-icon"><i class="ri-folder-upload-line"></i></div>
+                    <div class="upload-text">
+                        <h3>Arraste os arquivos aqui</h3>
+                        <p>ou clique para selecionar (Max 300)</p>
+                    </div>
+                </div>
+
+                <div class="file-list">
+                    <div class="file-item">
+                        <div class="file-info">
+                            <i class="ri-file-text-line"></i>
+                            gabarito_turma_A_001.pdf
+                        </div>
+                        <i class="ri-check-double-line" style="color: var(--success)"></i>
+                    </div>
+                    <div class="file-item">
+                        <div class="file-info">
+                            <i class="ri-file-text-line"></i>
+                            gabarito_turma_A_002.pdf
+                        </div>
+                        <i class="ri-check-double-line" style="color: var(--success)"></i>
+                    </div>
+                    <div class="file-item">
+                        <div class="file-info">
+                            <i class="ri-file-text-line"></i>
+                            gabarito_turma_A_003.pdf
+                        </div>
+                        <i class="ri-check-double-line" style="color: var(--success)"></i>
+                    </div>
+                    <div class="file-item">
+                        <div class="file-info">
+                            <i class="ri-file-text-line"></i>
+                            gabarito_turma_A_004.pdf
+                        </div>
+                        <i class="ri-loader-4-line" style="color: var(--text-secondary)"></i>
+                    </div>
+                </div>
+
+                <div class="correction-form">
+                    <div class="input-group">
+                        <label>Gabarito Oficial (Chave)</label>
+                        <input type="text" placeholder="Cole a sequência ou carregue o arquivo..." value="1A-2B-3C-4D-5E-6A...">
+                    </div>
+                    <button class="btn-primary">
+                        <i class="ri-magic-line"></i> Corrigir Todos
+                    </button>
+                </div>
+            </section>
+
+            <!-- Column 3: Results -->
+            <section class="card card-results">
+                <div class="card-header">
+                    <i class="ri-bar-chart-grouped-line"></i>
+                    <h2>Resultados em Tempo Real</h2>
+                </div>
+
+                <div class="results-overview">
+                    <div class="overview-card">
+                        <span class="overview-label">Provas Processadas</span>
+                        <span class="overview-value">142<span style="font-size: 16px; font-weight: 400; color: #008f5a; margin-left: 5px;">/ 300</span></span>
+                    </div>
+                    <div class="overview-card" style="background: #e0f2fe;">
+                        <span class="overview-label">Média Geral</span>
+                        <span class="overview-value" style="color: #0284c7">7.8</span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome do Aluno</th>
+                                <th>Turma</th>
+                                <th>Acertos</th>
+                                <th>Nota</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Ana Silva Oliveira</td>
+                                <td>2º Ano A</td>
+                                <td>58/65</td>
+                                <td><span class="score-badge score-high">8.9</span></td>
+                            </tr>
+                            <tr>
+                                <td>Bruno Santos Souza</td>
+                                <td>2º Ano A</td>
+                                <td>62/65</td>
+                                <td><span class="score-badge score-high">9.5</span></td>
+                            </tr>
+                            <tr>
+                                <td>Carla Mendes</td>
+                                <td>2º Ano B</td>
+                                <td>45/65</td>
+                                <td><span class="score-badge score-med">6.9</span></td>
+                            </tr>
+                            <tr>
+                                <td>Daniel Rocha</td>
+                                <td>2º Ano A</td>
+                                <td>30/65</td>
+                                <td><span class="score-badge score-low">4.6</span></td>
+                            </tr>
+                            <tr>
+                                <td>Eduarda Lima</td>
+                                <td>2º Ano C</td>
+                                <td>55/65</td>
+                                <td><span class="score-badge score-high">8.4</span></td>
+                            </tr>
+                            <tr>
+                                <td>Felipe Costa</td>
+                                <td>2º Ano B</td>
+                                <td>50/65</td>
+                                <td><span class="score-badge score-high">7.6</span></td>
+                            </tr>
+                            <tr>
+                                <td>Gabriela Torres</td>
+                                <td>2º Ano A</td>
+                                <td>64/65</td>
+                                <td><span class="score-badge score-high">9.8</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="chart-container">
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height: 10%; background: #ef4444;"></div>
+                        <span class="bar-label">0-2</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height: 25%; background: #f59e0b;"></div>
+                        <span class="bar-label">3-5</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height: 45%; background: #00a86b;"></div>
+                        <span class="bar-label">6-8</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height: 70%; background: #10b981;"></div>
+                        <span class="bar-label">9-10</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-info">
+                <h4>Escola Modelo de Ensino Avançado</h4>
+                <p>Sistema de Gestão Acadêmica v2.4 | © 2024 Todos os direitos reservados</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-link"><i class="ri-customer-service-2-line"></i> Suporte Técnico</div>
+                <div class="footer-link"><i class="ri-mail-send-line"></i> contato@escola.edu.br</div>
+                <div class="footer-link"><i class="ri-phone-line"></i> (11) 3456-7890</div>
+            </div>
+        </footer>
+    </div>
+
+</body>
+</html>
